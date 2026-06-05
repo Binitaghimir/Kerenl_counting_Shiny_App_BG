@@ -12,13 +12,31 @@ try:
 except NameError:
     MODEL_PATH = Path("best.pt")
 
+# If the web server doesn't find the weights file locally, it pulls it from Google Drive
+if not MODEL_PATH.exists():
+    print("Downloading model weights from Google Drive...")
+    
+    # TODO: REPLACE THIS ID WITH YOUR ACTUAL GOOGLE DRIVE FILE ID
+    file_id = "1CQx8soSbJRVLeJwPASuiZmqMaN8Lfkyb"
+    cloud_url = f"https://docs.google.com/uc?export=download&id={file_id}"
+    
+    try:
+        # Set a user-agent header so Google Drive accepts the request from the server
+        opener = urllib.request.build_opener()
+        opener.addheaders = [('User-agent', 'Mozilla/5.0')]
+        urllib.request.install_opener(opener)
+        
+        urllib.request.urlretrieve(cloud_url, MODEL_PATH)
+        print("Download from Google Drive complete.")
+    except Exception as e:
+        print(f"Google Drive download failed: {e}")
+
 try:
     model = YOLO(str(MODEL_PATH))
-    print("Success: Loaded model weights from local path.")
+    print("Success: Loaded model weights perfectly.")
 except Exception as e:
-    print(f"Warning: Model not found. Running in demo simulation mode. Error: {e}")
+    print(f"Warning: Model could not initialize. Running in demo mode. Error: {e}")
     model = None
-
 # JUPYTER VALIDATION HYPERPARAMETERS
 CONF = 0.467
 NMS_IOU = 0.70
